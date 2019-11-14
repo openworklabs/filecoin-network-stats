@@ -31,22 +31,22 @@ export class ChainClientImpl implements IChainClient {
     const headsRaw = await this.client.getJSON<HeadJSON[]>('chain/head');
     const heads = headsRaw.map((h) => h['/']);
     const unconfBlocks: BlockFromClientWithMessages[] = [];
-
     logger.info('fetching heads', {
       heads
     });
 
     const insertedParents: {[k:string]: boolean} = {};
     const heights: number[] = [];
-    while (heads.length) {
+    let count = 0
+    while (count < 5) {
       const head = heads.shift();
       const block = await this.fetchBlock(head);
-
       if (block.height > toBlock) {
         for (const parent of block.parents) {
           if (!insertedParents[parent]) {
             insertedParents[parent] = true;
             heads.push(parent);
+            count++
           }
         }
 
@@ -74,7 +74,6 @@ export class ChainClientImpl implements IChainClient {
 
     return messages.map((wrapper: MessageJSON, i: number) => {
       const m = wrapper.meteredMessage;
-
       return {
         height,
         tipsetHash,
