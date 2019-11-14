@@ -38,9 +38,10 @@ export class ChainClientImpl implements IChainClient {
     const insertedParents: {[k:string]: boolean} = {};
     const heights: number[] = [];
     let count = 0
-    while (count < 5) {
+    // while (heads.length && count < 5) {
       const head = heads.shift();
-      const block = await this.fetchBlock(head);
+      const block = await this.fetchBlock('bafy2bzaceaxd64ic4e36kbkn3apxdbjkknrdar7kozc552pd55aurowy5kocs');
+      // console.log('block messages', block.messages)
       if (block.height > toBlock) {
         for (const parent of block.parents) {
           if (!insertedParents[parent]) {
@@ -55,7 +56,7 @@ export class ChainClientImpl implements IChainClient {
           heights.unshift(block.height);
         }
       }
-    }
+    // }
 
     const prunedHeights = heights.slice(0, -2);
     const maxHeight = prunedHeights[prunedHeights.length - 1];
@@ -64,7 +65,8 @@ export class ChainClientImpl implements IChainClient {
       maxHeight,
       toBlock,
     });
-    return unconfBlocks.filter((block: BlockFromClientWithMessages) => block.height <= maxHeight);
+    return unconfBlocks
+    // return unconfBlocks.filter((block: BlockFromClientWithMessages) => block.height <= maxHeight);
   }
 
   private inflateMessages (messages: MessageJSON[] | null, height: number, tipsetHash: string): Message[] {
@@ -99,12 +101,13 @@ export class ChainClientImpl implements IChainClient {
     if (!decoder) {
       return data;
     }
-
+    if (name === 'addAsk') console.log('DATA', data)
     return decoder(data);
   }
 
   private async fetchBlock (tipsetHash: string): Promise<BlockFromClientWithMessages> {
     const json = await this.client.getJSON<RawBlockJSON>(`show/block/${tipsetHash}`);
+    // console.log('JSON', json)
     const height = Number(json.Header.height);
     const parents = json.Header.parents ? json.Header.parents.map((p) => p['/']) : [];
 

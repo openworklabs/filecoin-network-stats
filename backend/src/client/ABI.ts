@@ -67,6 +67,8 @@ export class ABIDecoder {
 
   public decode (): any[] {
     const chunks = CBOR.decode(this.data) as Buffer[];
+    console.log('~~~~~~~~~~~~~~~~~~~~~~~')
+    console.log('DECODING CHUNKS', chunks)
 
     if (chunks.length !== this.decoders.length) {
       throw new Error('number of decoders must equal number of components');
@@ -76,14 +78,19 @@ export class ABIDecoder {
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
       const dec = this.decoders[i];
+      console.log('DECODE', dec, chunk)
       out.push(dec.decode(chunk));
     }
+
+    console.log('OUT', out)
+    console.log('~~~~~~~~~~~~~~~~~~~~~~~')
 
     return out;
   }
 
   static decodeBase64 (decoders: TypeDecoder<any>[], data: string): any[] {
     const buf = Buffer.from(data, 'base64');
+    if (data === 'gkSAwtcvQA==') console.log('BUFF AND DATA', data, buf)
     return new ABIDecoder(decoders, buf).decode();
   }
 }

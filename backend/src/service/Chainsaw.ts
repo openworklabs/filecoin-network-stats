@@ -8,7 +8,7 @@ import {IMiningPowerService} from './MiningPowerService';
 
 const logger = makeLogger('Chainsaw');
 
-const POLL_INTERVAL = 5000;
+const POLL_INTERVAL = 200000;
 
 export default class Chainsaw implements IService {
   private readonly cDao: IChainsawDAO;
@@ -58,6 +58,7 @@ export default class Chainsaw implements IService {
 
     logger.silly('started poll');
     const unseenBlocks = await this.client.chain().ls(this.lastHeight);
+    // console.log('UNSEEN BLOCKS', unseenBlocks)
     if (!unseenBlocks.length) {
       logger.info('chainsaw found no new blocks to process, trying again later');
       return;
@@ -103,7 +104,8 @@ export default class Chainsaw implements IService {
     }
 
     const minerUpdates = await pledgeUpdater.update();
-    await this.cDao.persistPoll(blocks, minerUpdates);
-    await this.mps.updateMarketPower();
+    // console.log('BLOCKS', JSON.stringify(blocks, null, 2))
+    // await this.cDao.persistPoll(blocks, minerUpdates);
+    // await this.mps.updateMarketPower();
   }
 }
